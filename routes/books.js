@@ -1,5 +1,8 @@
 const express = require("express");
 const Book = require("../models/book");
+const jsonschema = require("jsonschema");
+const bookSchema = require("../bookSchema.json");
+const ExpressError = require("../expressError");
 
 const router = new express.Router();
 
@@ -30,7 +33,14 @@ router.get("/:id", async function (req, res, next) {
 
 router.post("/", async function (req, res, next) {
   try {
+    const result = jsonschema.validate(req.body, bookSchema);
+
+    if (!result.valid) {
+      throw new ExpressError(`Invalid data.`, 400);
+    }
+    console.log("before creation")
     const book = await Book.create(req.body);
+    console.log("after creation")
     return res.status(201).json({ book });
   } catch (err) {
     return next(err);
