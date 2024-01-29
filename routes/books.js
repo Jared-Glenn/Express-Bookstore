@@ -36,11 +36,11 @@ router.post("/", async function (req, res, next) {
     const result = jsonschema.validate(req.body, bookSchema);
 
     if (!result.valid) {
-      throw new ExpressError(`Invalid data.`, 400);
+      let listOfErrors = result.errors.map(error => error.stack);
+      let error = new ExpressError(listOfErrors, 400);
+      return next(error);
     }
-    console.log("before creation")
     const book = await Book.create(req.body);
-    console.log("after creation")
     return res.status(201).json({ book });
   } catch (err) {
     return next(err);
@@ -51,6 +51,13 @@ router.post("/", async function (req, res, next) {
 
 router.put("/:isbn", async function (req, res, next) {
   try {
+    const result = jsonschema.validate(req.body, bookSchema);
+
+    if (!result.valid) {
+      let listOfErrors = result.errors.map(error => error.stack);
+      let error = new ExpressError(listOfErrors, 400);
+      return next(error);
+    }
     const book = await Book.update(req.params.isbn, req.body);
     return res.json({ book });
   } catch (err) {

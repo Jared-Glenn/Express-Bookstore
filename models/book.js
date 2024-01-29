@@ -62,7 +62,6 @@ class Book {
    * */
 
   static async create(data) {
-    console.log(data.isbn)
     const result = await db.query(
       `INSERT INTO books (
             isbn,
