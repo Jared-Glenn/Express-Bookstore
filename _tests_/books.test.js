@@ -23,13 +23,11 @@ describe("POST /books", function () {
   });
 
   test("base test", async function () {
-    console.log("Running first test")
     expect(1).toEqual(1);
   });
 
   test("get book info", async function () {
     const response = await request(app).get("/books")
-    console.log(response.body.books);
 
     expect(response.body.books).toEqual([{
         "isbn": "0691161518",
@@ -43,7 +41,7 @@ describe("POST /books", function () {
     }]);
   });
 
-    test("can register", async function () {
+    test("can create new books", async function () {
       await request(app)
         .post("/books")
         .send({
@@ -70,6 +68,41 @@ describe("POST /books", function () {
         "year": 2016
       });
   });
+
+  test("can edit a book", async function () {
+    await request(app)
+      .put("/books/0691161518")
+      .send({
+        "isbn": "0691161518",
+        "amazon_url": "http://a.co/eobPtX2",
+        "author": "Matthew Maine",
+        "language": "english",
+        "pages": 264,
+        "publisher": "Princeton University Press",
+        "title": "Power-Up: Unlocking the Hidden Mathematics in Video Games",
+        "year": 2017
+      });
+        
+    let response = await request(app).get("/books/0691161518")
+
+    expect(response.body.book).toEqual({
+      "isbn": "0691161518",
+      "amazon_url": "http://a.co/eobPtX2",
+      "author": "Matthew Maine",
+      "language": "english",
+      "pages": 264,
+      "publisher": "Princeton University Press",
+      "title": "Power-Up: Unlocking the Hidden Mathematics in Video Games",
+      "year": 2017
+    });
+});
+
+test("can delete a book", async function () {
+  const response = await request(app)
+    .delete("/books/0691161518");
+      
+  expect(response.body).toEqual({ message: "Book deleted" });
+});
 
 afterAll(async function() {
     await db.end();
